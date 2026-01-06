@@ -165,9 +165,6 @@ class SecureChat {
             this.updateChatHeader(conn.peer);
             this.showToast(`Incoming connection from ${conn.peer}`, 'info');
 
-            // Show message input immediately for incoming connections
-            document.getElementById('messageInputContainer').classList.remove('hidden');
-
             // Clear empty state
             const messagesContainer = document.getElementById('messagesContainer');
             messagesContainer.innerHTML = '';
@@ -220,9 +217,6 @@ class SecureChat {
         this.recipientId = peerId;
         this.updateChatHeader(peerId);
 
-        // Show message input immediately for outgoing connections
-        document.getElementById('messageInputContainer').classList.remove('hidden');
-
         // Clear empty state
         const messagesContainer = document.getElementById('messagesContainer');
         messagesContainer.innerHTML = '';
@@ -236,7 +230,7 @@ class SecureChat {
             console.log('Connection established');
             this.showToast('Connection established! You can now send encrypted messages.', 'success');
 
-            // Ensure message input is visible (already shown, but verify)
+            // Show message input only when connection is fully open and ready
             document.getElementById('messageInputContainer').classList.remove('hidden');
         });
 
@@ -255,6 +249,9 @@ class SecureChat {
         this.connection.on('error', (err) => {
             console.error('Connection error:', err);
             this.showToast('Connection error: ' + err.message, 'error');
+
+            // Hide message input on error
+            document.getElementById('messageInputContainer').classList.add('hidden');
         });
     }
 
