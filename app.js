@@ -142,13 +142,26 @@ class SecureChat {
 
     // Setup PeerJS connection
     setupPeer() {
-        // Use public PeerJS server
+        // Use public PeerJS server with better ICE servers
         this.peer = new Peer(this.myId, {
-            debug: 2,
+            debug: 3,
             config: {
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' },
+                    {
+                        urls: 'turn:openrelay.metered.ca:80',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    },
+                    {
+                        urls: 'turn:openrelay.metered.ca:443',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    }
                 ]
             }
         });
@@ -160,6 +173,7 @@ class SecureChat {
         });
 
         this.peer.on('connection', (conn) => {
+            console.log('📞 Incoming connection from:', conn.peer);
             this.connection = conn;
             this.recipientId = conn.peer;
             this.updateChatHeader(conn.peer);
@@ -210,9 +224,14 @@ class SecureChat {
 
         this.showToast(`Connecting to ${peerId}...`, 'info');
 
+        console.log('Attempting to connect to peer:', peerId);
+
         this.connection = this.peer.connect(peerId, {
-            reliable: true
+            reliable: true,
+            serialization: 'json'
         });
+
+        console.log('Connection object created:', this.connection);
 
         this.recipientId = peerId;
         this.updateChatHeader(peerId);
@@ -226,8 +245,20 @@ class SecureChat {
 
     // Setup connection event listeners
     setupConnection() {
+        console.log('Setting up connection listeners...');
+
+        // Add timeout for connection
+        const connectionTimeout = setTimeout(() => {
+            if (this.connection && !this.connection.open) {
+                console.warn('Connection timeout - taking too long to establish');
+                this.showToast('Connection timeout. Please try again.', 'error');
+                this.connection.close();
+            }
+        }, 15000); // 15 second timeout
+
         this.connection.on('open', () => {
-            console.log('Connection established');
+            console.log('✅ Connection fully established and open!');
+            clearTimeout(connectionTimeout);
             this.showToast('Connection established! You can now send encrypted messages.', 'success');
 
             // Show message input only when connection is fully open and ready
@@ -235,6 +266,7 @@ class SecureChat {
         });
 
         this.connection.on('data', async (data) => {
+            console.log('📩 Received data:', data);
             if (data.type === 'message') {
                 const decryptedMessage = await this.decryptMessage(data.encrypted);
                 this.addMessage(decryptedMessage, 'received', data.timestamp);
@@ -242,17 +274,27 @@ class SecureChat {
         });
 
         this.connection.on('close', () => {
+            console.log('Connection closed');
+            clearTimeout(connectionTimeout);
             this.showToast('Connection closed', 'info');
             document.getElementById('messageInputContainer').classList.add('hidden');
         });
 
         this.connection.on('error', (err) => {
-            console.error('Connection error:', err);
+            console.error('❌ Connection error:', err);
+            clearTimeout(connectionTimeout);
             this.showToast('Connection error: ' + err.message, 'error');
 
             // Hide message input on error
             document.getElementById('messageInputContainer').classList.add('hidden');
         });
+
+        // Log ICE connection state changes
+        if (this.connection.peerConnection) {
+            this.connection.peerConnection.oniceconnectionstatechange = () => {
+                console.log('ICE Connection State:', this.connection.peerConnection.iceConnectionState);
+            };
+        }
     }
 
     // Send message
