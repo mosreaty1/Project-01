@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureChat - Encrypted Messaging</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 2L2 9v12c0 8.284 6 14 14 14s14-5.716 14-14V9L16 2z" fill="url(#gradient)" stroke="#fff" stroke-width="2"/>
+                    <defs>
+                        <linearGradient id="gradient" x1="2" y1="2" x2="30" y2="30">
+                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>SecureChat</span>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Initializing...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="user-card">
+                    <div class="user-avatar">
+                        <svg width="48" height="48" viewBox="0 0 48 48">
+                            <circle cx="24" cy="24" r="24" fill="url(#avatarGradient)"/>
+                            <text x="24" y="30" text-anchor="middle" fill="white" font-size="20" font-weight="600">You</text>
+                            <defs>
+                                <linearGradient id="avatarGradient" x1="0" y1="0" x2="48" y2="48">
+                                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="user-info">
+                        <h3>Your ID</h3>
+                        <div class="user-id-display">
+                            <span id="myUserId" class="user-id">------</span>
+                            <button id="copyIdBtn" class="copy-btn" title="Copy ID">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1H2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="id-hint">Share this ID to receive messages</p>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="connect-section">
+                    <h4>Connect to User</h4>
+                    <form id="connectForm">
+                        <div class="input-group">
+                            <input
+                                type="text"
+                                id="recipientId"
+                                placeholder="Enter 6-digit ID"
+                                maxlength="6"
+                                pattern="[0-9]{6}"
+                                required
+                            >
+                            <button type="submit" class="btn btn-primary">Connect</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="security-info">
+                    <div class="security-badge">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <strong>End-to-End Encrypted</strong>
+                            <p>All messages are encrypted with AES-256-GCM</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Chat Area -->
+            <main class="chat-area">
+                <div class="chat-header">
+                    <div id="chatHeaderContent" class="empty-state-text">
+                        Select a user to start chatting
+                    </div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <div class="empty-state">
+                        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+                            <circle cx="60" cy="60" r="50" fill="#f0f4f8"/>
+                            <path d="M40 50h40M40 65h30" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+                            <rect x="30" y="35" width="60" height="50" rx="5" stroke="#cbd5e1" stroke-width="3" fill="none"/>
+                        </svg>
+                        <h3>No messages yet</h3>
+                        <p>Enter a 6-digit ID to start a secure conversation</p>
+                    </div>
+                </div>
+
+                <div class="message-input-container" id="messageInputContainer" style="display: none;">
+                    <form id="messageForm">
+                        <div class="input-wrapper">
+                            <textarea
+                                id="messageInput"
+                                placeholder="Type your encrypted message..."
+                                rows="1"
+                                required
+                            ></textarea>
+                            <button type="submit" class="send-btn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+                    <div class="encryption-status">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M6 1L1 3.5v3.75C1 10.227 3.239 12 6 12s5-1.773 5-4.75V3.5L6 1z"/>
+                        </svg>
+                        <span>Messages are end-to-end encrypted</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
